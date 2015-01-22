@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+            
+    </head>
+    <body>
+        <input type="textbox" id="calcDisplay"/><br/><br/>
+        <input type="button" value="1" onclick="onButtonClick('1');" />
+        <input type="button" value="2" onclick="onButtonClick('2');" />
+        <input type="button" value="3" onclick="onButtonClick('3');" />
+        <input type="button" value="/" onclick="onButtonClick('/');" /><br/>
+        <input type="button" value="4" onclick="onButtonClick('4');" />
+        <input type="button" value="5" onclick="onButtonClick('5');" />
+        <input type="button" value="6" onclick="onButtonClick('6');" />
+        <input type="button" value="*" onclick="onButtonClick('*');" /><br/>
+        <input type="button" value="7" onclick="onButtonClick('7');" />
+        <input type="button" value="8" onclick="onButtonClick('8');" />
+        <input type="button" value="9" onclick="onButtonClick('9');" />
+        <input type="button" value="-" onclick="onButtonClick('-');" /><br/>
+        <input type="button" value="." onclick="onButtonClick('.');" />
+        <input type="button" value="0" onclick="onButtonClick('0');" />
+        <input type="button" value="=" onclick="onCalculate();" />
+        <input type="button" value="+" onclick="onButtonClick('+');" /><br/>
+        <input type="button" value="(" onclick="onButtonClick('(');" />
+        <input type="button" value=")" onclick="onButtonClick(')');" />
+        <script>
+            var calcDisplay = document.getElementById("calcDisplay");
+            
+            function arrayContains(arr, obj) {
+                var i = arr.length;
+                while (i--) {
+                    if (arr[i] === obj) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function onButtonClick(value){                
+                calcDisplay.value = calcDisplay.value + value;
+            }
+            
+            function extractBracketsExpression(expressionString){
+                var buffer = "";
+                var brackets = 0;
+
+                for (var i=0; i < expressionString.length; i++) {
+                    var currentChar = expressionString[i];
+                    if(currentChar === "("){
+                        brackets++;
+                    }
+                    else if(currentChar === ")"){
+                        brackets--;
+                        if(brackets === 0){
+                            return buffer;                        
+                        }
+                    }
+                    else{
+                        buffer = buffer + currentChar; 
+                    }
+                }
+            }
+
+            function parseExpression(expressionString){
+                var buffer = "";
+                var expressionArray = [];
+                
+                for (var i=0; i < expressionString.length; i++) {
+                    var currentChar = expressionString[i];
+                    if (currentChar === "+" || currentChar === "-" || currentChar === "*" || currentChar === "/") {
+                        expressionArray.push(buffer);
+                        buffer = "";
+                        expressionArray.push(currentChar);
+                    }
+                    else if(currentChar === "("){
+                        var remainingExpressionString = expressionString.substr(i);
+                        var bracketsExpression = extractBracketsExpression(remainingExpressionString);
+                        var bracketsExpressionArray = parseExpression(bracketsExpression);
+
+                        i += bracketsExpression.length;
+                        expressionArray.push(bracketsExpressionArray);
+                    }
+                    else if (currentChar !== ")"){
+                        buffer = buffer + currentChar;                        
+                    }                 
+                }
+                expressionArray.push(buffer);
+                return expressionArray;
+            }
+            function calculateExpression(expressionArray, operations){
+                var result = [];
+                for (var i=0; i < expressionArray.length; i++) {
+                    var currentElement = expressionArray[i];
+                    if (arrayContains(operations, currentElement)) 
+                    {
+                        var lastResult = result[result.length-1];
+                        var nextElement = expressionArray[i+1];
+                        var calculationResult = calculateOperation(currentElement, lastResult, nextElement);
+                        result[result.length-1] = calculationResult;
+                        i += 1;
+                    }
+                    else {
+                        result.push(currentElement);
+                    }
+                }
+                return result;            
+            }
+            function calculateOperation(operation, operand1, operand2){
+                var operand1Number = parseFloat(operand1, 10);
+                var operand2Number = parseFloat(operand2, 10);
+                switch(operation){
+                    case '+': return operand1Number + operand2Number;
+                    case '-': return operand1Number - operand2Number;
+                    case '*': return operand1Number * operand2Number;
+                    case '/': return operand1Number / operand2Number;
+                }
+            }
+            
+            function doCalculation(expressionString){
+                var expressionArray = parseExpression(expressionString);
+                console.log(expressionArray);
+                var result = calculateExpression(expressionArray, ['*', '/']);
+                var result = calculateExpression(result, ['+', '-']);
+
+                return result;
+            }
+
+            function onCalculate(){
+                var expressionString = calcDisplay.value;
+                var result = doCalculation(expressionString);              
+
+                calcDisplay.value = result;
+            }            
+        </script>
+    </body>
+</html>
