@@ -1,136 +1,186 @@
 <!DOCTYPE html>
 <html>
-    <head>
-         <title>Calculator</title>   
-    </head>
-    <body>
-        <input type="textbox" id="calcDisplay"/><br/><br/>
-        <input type="button" value="1" onclick="onButtonClick('1');" />
-        <input type="button" value="2" onclick="onButtonClick('2');" />
-        <input type="button" value="3" onclick="onButtonClick('3');" />
-        <input type="button" value="/" onclick="onButtonClick('/');" /><br/>
-        <input type="button" value="4" onclick="onButtonClick('4');" />
-        <input type="button" value="5" onclick="onButtonClick('5');" />
-        <input type="button" value="6" onclick="onButtonClick('6');" />
-        <input type="button" value="*" onclick="onButtonClick('*');" /><br/>
-        <input type="button" value="7" onclick="onButtonClick('7');" />
-        <input type="button" value="8" onclick="onButtonClick('8');" />
-        <input type="button" value="9" onclick="onButtonClick('9');" />
-        <input type="button" value="-" onclick="onButtonClick('-');" /><br/>
-        <input type="button" value="." onclick="onButtonClick('.');" />
-        <input type="button" value="0" onclick="onButtonClick('0');" />
-        <input type="button" value="=" onclick="onCalculate();" />
-        <input type="button" value="+" onclick="onButtonClick('+');" /><br/>
-        <input type="button" value="(" onclick="onButtonClick('(');" />
-        <input type="button" value=")" onclick="onButtonClick(')');" />
-        <script>
-            var calcDisplay = document.getElementById("calcDisplay");
-            
-            function arrayContains(arr, obj) {
-                var i = arr.length;
-                while (i--) {
-                    if (arr[i] === obj) {
-                        return true;
-                    }
-                }
-                return false;
-            }
+<head>
+    <title>Calculator</title>
+</head>
+<body>
+    <input type="textbox" id="calcDisplay" /><br/><br/>
+    <input type="button" value="1" onclick="onButtonClick('1');" />
+    <input type="button" value="2" onclick="onButtonClick('2');" />
+    <input type="button" value="3" onclick="onButtonClick('3');" />
+    <input type="button" value="/" onclick="onButtonClick('/');" /><br/>
+    <input type="button" value="4" onclick="onButtonClick('4');" />
+    <input type="button" value="5" onclick="onButtonClick('5');" />
+    <input type="button" value="6" onclick="onButtonClick('6');" />
+    <input type="button" value="*" onclick="onButtonClick('*');" /><br/>
+    <input type="button" value="7" onclick="onButtonClick('7');" />
+    <input type="button" value="8" onclick="onButtonClick('8');" />
+    <input type="button" value="9" onclick="onButtonClick('9');" />
+    <input type="button" value="-" onclick="onButtonClick('-');" /><br/>
+    <input type="button" value="." onclick="onButtonClick('.');" />
+    <input type="button" value="0" onclick="onButtonClick('0');" />
+    <input type="button" value="=" onclick="onCalculate();" />
+    <input type="button" value="+" onclick="onButtonClick('+');" /><br/>
+    <input type="button" value="(" onclick="onButtonClick('(');" />
+    <input type="button" value=")" onclick="onButtonClick(')');" /><br/>
+    <script>
+        var calcDisplay = document.getElementById("calcDisplay");
 
-            function onButtonClick(value){                
-                calcDisplay.value = calcDisplay.value + value;
-            }
-            
-            function extractBracketsExpression(expressionString){
-                var buffer = "";
-                var brackets = 0;
+        function onButtonClick(value) {
+            calcDisplay.value = calcDisplay.value + value;
+        }
 
-                for (var i=0; i < expressionString.length; i++) {
-                    var currentChar = expressionString[i];
-                    if(currentChar === "("){
-                        brackets++;
-                    }
-                    else if(currentChar === ")"){
-                        brackets--;
-                        if(brackets === 0){
-                            return buffer;                        
-                        }
-                    }
-                    else{
-                        buffer = buffer + currentChar; 
-                    }
-                }
-            }
-
-            function parseExpression(expressionString){
-                var buffer = "";
-                var expressionArray = [];
-                
-                for (var i=0; i < expressionString.length; i++) {
-                    var currentChar = expressionString[i];
-                    if (currentChar === "+" || currentChar === "-" || currentChar === "*" || currentChar === "/") {
+        function parseExpression(expressionString) {
+            var buffer = "";
+            var expressionArray = [];
+            for (var i = 0; i < expressionString.length; i++) {
+                var currentChar = expressionString[i];
+                if (currentChar === "+" || currentChar === "-" || currentChar === "*" || currentChar === "/"
+                    || currentChar === "(" || currentChar === ")")
+                {
+                    if (buffer !== "") {
                         expressionArray.push(buffer);
-                        buffer = "";
-                        expressionArray.push(currentChar);
                     }
-                    else if(currentChar === "("){
-                        var remainingExpressionString = expressionString.substr(i);
-                        var bracketsExpression = extractBracketsExpression(remainingExpressionString);
-                        var bracketsExpressionArray = parseExpression(bracketsExpression);
-
-                        i += bracketsExpression.length;
-                        expressionArray.push(bracketsExpressionArray);
-                    }
-                    else if (currentChar !== ")"){
-                        buffer = buffer + currentChar;                        
-                    }                 
+                    buffer = "";
+                    expressionArray.push(currentChar);
+                } else {
+                    buffer = buffer + currentChar;
                 }
+            }
+            if (buffer !== "") {
                 expressionArray.push(buffer);
-                return expressionArray;
             }
-            function calculateExpression(expressionArray, operations){
-                var result = [];
-                for (var i=0; i < expressionArray.length; i++) {
-                    var currentElement = expressionArray[i];
-                    if (arrayContains(operations, currentElement)) 
-                    {
-                        var lastResult = result[result.length-1];
-                        var nextElement = expressionArray[i+1];
-                        var calculationResult = calculateOperation(currentElement, lastResult, nextElement);
-                        result[result.length-1] = calculationResult;
-                        i += 1;
-                    }
-                    else {
-                        result.push(currentElement);
-                    }
-                }
-                return result;            
-            }
-            function calculateOperation(operation, operand1, operand2){
-                var operand1Number = parseFloat(operand1, 10);
-                var operand2Number = parseFloat(operand2, 10);
-                switch(operation){
-                    case '+': return operand1Number + operand2Number;
-                    case '-': return operand1Number - operand2Number;
-                    case '*': return operand1Number * operand2Number;
-                    case '/': return operand1Number / operand2Number;
-                }
-            }
-            
-            function doCalculation(expressionString){
-                var expressionArray = parseExpression(expressionString);
-                console.log(expressionArray);
-                var result = calculateExpression(expressionArray, ['*', '/']);
-                var result = calculateExpression(result, ['+', '-']);
+            return expressionArray;
+        }
 
+        function calculateExpression(expressionArray) {
+            var valueStack = [];
+            var operationsStack = [];
+
+            function processStackTopOperation() {
+                if (operationsStack.length == 0) {
+                    return false;
+                } else {
+                    var topOperation = operationsStack.pop();
+                    var operand1 = valueStack.pop();
+                    var operand2 = valueStack.pop();
+                    var result = calculateOperation(topOperation, operand2, operand1);
+                    valueStack.push(result);
+                    return true;
+                }
+            }
+
+            function getOperationPrecedence(operationLiteral) {
+                switch (operationLiteral) {
+                    case '+':
+                    case '-':
+                        return 1;
+                    case '*':
+                    case '/':
+                        return 2;
+                }
+                throw new Error("Invalid input");
+            }
+
+            function getTopOperation() {
+                var topOperation = operationsStack[operationsStack.length - 1];
+                return topOperation;
+            }
+
+            function getTopOperationPrecedence() {
+                var topOperation = getTopOperation();
+                var result = getOperationPrecedence(topOperation);
                 return result;
             }
 
-            function onCalculate(){
-                var expressionString = calcDisplay.value;
-                var result = doCalculation(expressionString);              
+            var nextLiteral;
+            while (nextLiteral = expressionArray.shift()) {
+                if (isNumeric(nextLiteral)) {
+                    valueStack.push(nextLiteral);
+                } else if (isOperation(nextLiteral)) {
+                    var topOperation = getTopOperation();
+                    if (operationsStack.length == 0 || topOperation == "(") {
+                        operationsStack.push(nextLiteral);
+                    } else {
+                        var topOperationPrecedence = getOperationPrecedence(topOperation);
+                        var currentOperationPrecedence = getOperationPrecedence(nextLiteral);
+                        if (currentOperationPrecedence > topOperationPrecedence) {
+                            operationsStack.push(nextLiteral);
+                        } else {
+                            processStackTopOperation();
+                            expressionArray.unshift(nextLiteral);
+                        }
+                    }
+                } else if (isBracket(nextLiteral)) {
+                    if (nextLiteral == "(") {
+                        operationsStack.push(nextLiteral);
+                    } else {
+                        var topOperation = getTopOperation();
+                        while (topOperation != "(") {
+                            processStackTopOperation();
+                            topOperation = getTopOperation();
+                        }
+                        operationsStack.pop();
+                    }
+                } else {
+                    alert("Invalid literal: " + nextLiteral);
+                    return false;
+                }
+            }
+            while (processStackTopOperation());
+            if (valueStack.length == 1 && operationsStack.length == 0) {
+                return valueStack[0];
+            } else {
+                alert("Parse error");
+                return false;
+            }
+        }
 
+        function calculateOperation(operation, operand1, operand2) {
+            var operand1Number = parseFloat(operand1, 10);
+            var operand2Number = parseFloat(operand2, 10);
+            switch (operation) {
+                case '+':
+                    return operand1Number + operand2Number;
+                case '-':
+                    return operand1Number - operand2Number;
+                case '*':
+                    return operand1Number * operand2Number;
+                case '/':
+                    return operand1Number / operand2Number;
+            }
+        }
+
+        function arrayContains(arr, obj) {
+            var i = arr.length;
+            while (i--) {
+                if (arr[i] === obj) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isNumeric(obj) {
+            return !isNaN(parseFloat(obj)) && isFinite(obj);
+        }
+
+        function isOperation(obj) {
+            return arrayContains(['+', '-', '*', '/'], obj);
+        }
+
+        function isBracket(obj) {
+            return arrayContains(['(', ')'], obj);
+        }
+
+        function onCalculate() {
+            var expressionString = calcDisplay.value;
+            var expressionArray = parseExpression(expressionString);
+            var result = calculateExpression(expressionArray);
+            if (result !== false) {
                 calcDisplay.value = result;
-            }            
-        </script>
-    </body>
+            }
+        }
+    </script>
+</body>
 </html>
